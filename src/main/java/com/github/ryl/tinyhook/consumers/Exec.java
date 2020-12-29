@@ -1,6 +1,8 @@
 package com.github.ryl.tinyhook.consumers;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -10,6 +12,8 @@ import java.util.function.Consumer;
 
 @AllArgsConstructor
 public class Exec implements Consumer<String>  {
+
+    private static final Logger logger = LoggerFactory.getLogger(Exec.class);
 
     private final String workdirPath;
 
@@ -28,9 +32,11 @@ public class Exec implements Consumer<String>  {
         builder.directory(workdir);
 
         try {
+            logger.info("Executing {}", String.join(" ", args));
             Process process = builder.start();
             process.waitFor(30, TimeUnit.SECONDS);
             int returnValue = process.exitValue();
+            logger.info("Process completed with status code {}", returnValue);
             Assert.isTrue(0 == returnValue, "Expected a return value of 0, but was " + returnValue);
         } catch (Exception e) {
             throw new ProcessException(e);
