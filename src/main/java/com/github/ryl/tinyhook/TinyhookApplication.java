@@ -22,7 +22,7 @@ public class TinyhookApplication {
   public WebHook webHook() {
     return new WebHook(
         eq("$['repository']['full_name']", "ryl/tinyhook").and(exists("$['commits']")),
-        exec("/opt/tinyhook/data", "rm -rf /opt/tinyhook/data/tinyhook")
+        exec("/opt/tinyhook/data", "rm", "-rf", "/opt/tinyhook/data/tinyhook")
             .andThen(exec("/opt/tinyhook/data", "git", "clone", "git@github.com:ryl/tinyhook.git"))
             .andThen(exec("/opt/tinyhook/data/tinyhook", "./gradlew", "build", "-x", "test")));
   }
