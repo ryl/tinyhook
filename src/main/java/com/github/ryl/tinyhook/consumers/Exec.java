@@ -33,8 +33,10 @@ public class Exec implements Consumer<String>  {
 
         try {
             logger.info("Executing {}", String.join(" ", args));
+            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
             Process process = builder.start();
-            process.waitFor(30, TimeUnit.SECONDS);
+            // TODO: Make this configurable.
+            process.wait();
             int returnValue = process.exitValue();
             logger.info("Process completed with status code {}", returnValue);
             Assert.isTrue(0 == returnValue, "Expected a return value of 0, but was " + returnValue);
