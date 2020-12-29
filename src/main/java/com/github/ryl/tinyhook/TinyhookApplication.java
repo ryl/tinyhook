@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.github.ryl.tinyhook.consumers.WebHookConsumers.exec;
 import static com.github.ryl.tinyhook.webhook.predicate.WebHookPredicates.eq;
 import static com.github.ryl.tinyhook.webhook.predicate.WebHookPredicates.exists;
 
@@ -18,13 +19,11 @@ public class TinyhookApplication {
   }
 
   @Bean
-  WebHook webHook() {
+  public WebHook webHook() {
     return new WebHook(
-        eq("$['repository']['full_name']", "/ryl/notes").and(exists("$['commits']")),
-        payload -> {
-          // TODO: Do something here.
-        }
-    );
-  };
+            eq("$['repository']['full_name']", "/ryl/tinyhook").and(exists("$['commits']")),
+            exec("/opt/tinyhook/data", "git", "clone", "git@github.com:ryl/tinyhook.git")
+                    .andThen(exec("/opt/tinyhook/data/tinyhook", "./gradlew", "build", "-x", "test")));
+  }
   
 }
