@@ -33,7 +33,7 @@ public class Exec implements Consumer<String>  {
 
         try {
             logger.info("Executing {}", String.join(" ", args));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+//            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
             Process process = builder.start();
             // TODO: Make this configurable.
             process.waitFor();
