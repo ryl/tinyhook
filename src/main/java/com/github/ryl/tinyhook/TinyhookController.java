@@ -2,7 +2,8 @@ package com.github.ryl.tinyhook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.ryl.tinyhook.webhook.WebHookRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 public class TinyhookController {
   
@@ -20,20 +19,19 @@ public class TinyhookController {
   
   private final ObjectMapper objectMapper;
   
-  public TinyhookController() {
+  private final WebHookRegistry registry;
+  
+  public TinyhookController(WebHookRegistry registry) {
     objectMapper = new ObjectMapper();
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    this.registry = registry;
   }
   
   @PostMapping("/webhook")
-  public void push(@RequestBody Map<String, Object> push, @RequestHeader HttpHeaders headers) throws Exception {
-    String json = objectMapper.writeValueAsString(push);
-    Object commits = JsonPath.read(json, "$['commits']");
-    String name = JsonPath.read(json, "$['repository']['full_name']");
-    
-    logger.info("Received a push\nHeaders: {}\nPayload: {}", objectMapper.writeValueAsString(headers), json);
-    logger.info("ry/notes = {}", name.equals("ryl/notes"));
-    logger.info("commits = {}", commits != null);
+  public void push(@RequestBody String event, @RequestHeader HttpHeaders headers) throws Exception {
+    String json = objectMapper.writeValueAsString(objectMapper.readValue(event, ObjectNode.class));
+    logger.info("Received an event\nHeaders: {}\nPayload: {}", objectMapper.writeValueAsString(headers), json);
+    registry.executeWebHooks(event);
   }
   
 }
