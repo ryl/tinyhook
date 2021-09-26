@@ -13,6 +13,7 @@ import (
   "net/http"
   "encoding/json"
   "os/exec"
+  "os"
 )
 
 type Config struct {
@@ -33,7 +34,7 @@ var config Config
 func main() {
   // config.json is the main configuration file for the application.
   // It contains server configuration and maps URLS to scripts.
-  data, err := ioutil.ReadFile("tinyhook.json")
+  data, err := ioutil.ReadFile(os.Args[1])
   if err != nil {
     log.Fatal(err)
   }
@@ -67,6 +68,7 @@ func main() {
     config.SSLCertificate,
     config.SSLPrivateKey,
     nil))
+  //log.Fatal(http.ListenAndServe(addr, nil))
 }
 
 func tinyhookGreeting(w http.ResponseWriter, r *http.Request) {
